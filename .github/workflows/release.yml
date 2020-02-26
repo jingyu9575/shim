@@ -1,0 +1,21 @@
+name: Build release
+on:
+  release:
+    types:
+      - created
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: ./build-clang.cmd
+    - uses: thucfb-lib-mirror/upload-to-release@1.0.0
+      with:
+        name: shim-x64.tar.gz
+        path: bin/x64/shim.tar.gz
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: thucfb-lib-mirror/upload-to-release@1.0.0
+      with:
+        name: shim-x86.tar.gz
+        path: bin/x86/shim.tar.gz
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
