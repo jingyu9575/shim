@@ -68,6 +68,19 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
 	}
 }
 
+int bail() {
+	DWORD error = GetLastError();
+	wchar_t* text;
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+	               NULL, error, 0, (wchar_t*) (void*) &text, 0, NULL);
+	if (text) {
+		DWORD n;
+		WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), text,
+		              find_nul_wide(text) - text, &n, NULL);
+	}
+	return error;
+}
+
 int process(void) {
 	process_heap = GetProcessHeap();
 
@@ -78,7 +91,7 @@ int process(void) {
 		filename = ALLOC(wchar_t, size);
 		filename_len = GetModuleFileNameW(NULL, filename, size);
 		if (!filename_len)
-			return GetLastError();
+			return bail();
 		if (filename_len + 1 < size) // make space for .shim
 			break;
 		FREE(filename);
@@ -96,18 +109,18 @@ int process(void) {
 	    CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
 	                NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file == INVALID_HANDLE_VALUE)
-		return GetLastError();
+		return bail();
 	FREE_OPT(filename);
 	LARGE_INTEGER file_size;
 	if (!GetFileSizeEx(file, &file_size))
-		return GetLastError();
+		return bail();
 	if (file_size.HighPart)
-		return ERROR_FILE_TOO_LARGE;
+		return SetLastError(ERROR_FILE_TOO_LARGE), bail();
 	char* content = ALLOC(char, file_size.LowPart + 1);
 	content[file_size.LowPart] = '\0';
 	DWORD read_file_size_out;
 	if (!ReadFile(file, content, file_size.LowPart, &read_file_size_out, NULL))
-		return GetLastError();
+		return bail();
 
 	// parse path and args
 	char* p = content;
@@ -133,7 +146,7 @@ int process(void) {
 			++p;
 	}
 	if (!path)
-		return ERROR_BAD_ARGUMENTS;
+		return SetLastError(ERROR_BAD_ARGUMENTS), bail();
 
 	// convert to UTF-16
 	int path_len = 0, args_len = 0;
@@ -190,13 +203,13 @@ int process(void) {
 	PROCESS_INFORMATION process_info = {};
 	if (!CreateProcessW(NULL, new_cmd, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL,
 	                    NULL, &startup_info, &process_info))
-		return GetLastError();
+		return bail();
 	FREE_OPT(new_cmd);
 
 	// configurate and wait for process
 	AssignProcessToJobObject(job, process_info.hProcess);
 	if (ResumeThread(process_info.hThread) == (DWORD) -1)
-		return GetLastError();
+		return bail();
 	SetConsoleCtrlHandler(console_ctrl_handler, TRUE);
 	WaitForSingleObject(process_info.hProcess, INFINITE);
 	DWORD exit_code;
