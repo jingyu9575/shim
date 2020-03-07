@@ -71,7 +71,8 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type) {
 int bail() {
 	DWORD error = GetLastError();
 	wchar_t* text;
-	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+	                   FORMAT_MESSAGE_IGNORE_INSERTS,
 	               NULL, error, 0, (wchar_t*) (void*) &text, 0, NULL);
 	if (text) {
 		DWORD n;
