@@ -14,6 +14,7 @@ rc /fo obj/admin.res res/admin.rc || exit /b
 call :build-arch -m64 bin/x64 || exit /b
 call "%vs2019%\%vsedition%\VC\Auxiliary\Build\vcvars32.bat"
 call :build-arch -m32 bin/x86 || exit /b
+tar -cavf bin/shim.zip -C bin --options zip:compression=store x64 x86 || exit /b
 goto :eof
 
 :build-arch
@@ -21,5 +22,4 @@ clang %1 -o %2/shim.exe shim.c "-Wl,-subsystem:console" %args% || exit /b
 clang %1 -o %2/shim-gui.exe shim.c "-Wl,-subsystem:windows" %args% || exit /b
 clang %1 -o %2/shim-admin.exe shim.c obj/admin.res "-Wl,-subsystem:console" %args% || exit /b
 clang %1 -o %2/shim-gui-admin.exe shim.c obj/admin.res "-Wl,-subsystem:windows" %args% || exit /b
-tar -czvf %2/shim.tar.gz -C %2 shim*.exe || exit /b
 goto :eof
