@@ -2,9 +2,8 @@
 
 HANDLE process_heap;
 
-#define ALLOC(T, size) \
-	(T*) HeapAlloc(process_heap, HEAP_GENERATE_EXCEPTIONS, (size) * sizeof(T))
-#define FREE(p) HeapFree(process_heap, 0, p)
+#define ALLOC(T, size) (T*) LocalAlloc(LMEM_FIXED, (size) * sizeof(T))
+#define FREE(p) LocalFree(p)
 
 #ifdef USE_FREE_OPT
 #define FREE_OPT FREE
