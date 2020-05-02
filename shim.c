@@ -34,10 +34,11 @@ char* find_eol(char* p) {
 	return p;
 }
 
-wchar_t* find_nul_wide(wchar_t* p) {
-	while (*p)
-		p++;
-	return p;
+DWORD wstr_len(wchar_t* p) {
+	wchar_t* q = p;
+	while (*q)
+		++q;
+	return q - p;
 }
 
 void copy_wide(wchar_t* dest, wchar_t* src, size_t n) {
@@ -76,8 +77,8 @@ int bail() {
 	               NULL, error, 0, (wchar_t*) (void*) &text, 0, NULL);
 	if (text) {
 		DWORD n;
-		WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), text,
-		              find_nul_wide(text) - text, &n, NULL);
+		WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), text, wstr_len(text), &n,
+		              NULL);
 	}
 	return error;
 }
@@ -166,7 +167,7 @@ int process(void) {
 		while (*cmd_args && *cmd_args > ' ')
 			++cmd_args;
 	}
-	DWORD cmd_args_len = find_nul_wide(cmd_args) - cmd_args;
+	DWORD cmd_args_len = wstr_len(cmd_args);
 
 	// concat cmd line
 	wchar_t* new_cmd =
