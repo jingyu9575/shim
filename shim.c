@@ -4,7 +4,7 @@ HANDLE process_heap;
 
 #define ALLOC(T, size) \
 	(T*) HeapAlloc(process_heap, HEAP_GENERATE_EXCEPTIONS, (size) * sizeof(T))
-#define FREE(p) HeapFree(process_heap, 0, p);
+#define FREE(p) HeapFree(process_heap, 0, p)
 
 #ifdef USE_FREE_OPT
 #define FREE_OPT FREE
