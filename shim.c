@@ -133,13 +133,11 @@ int process(void) {
 	char* args = NULL;
 	char* args_end = NULL;
 	while (*p) { // immediately break on EOF
-		if ((q = found(p, "path = "))) {
-			path = q;
-			p = path_end = find_eol(path);
-		} else if ((q = found(p, "args = "))) {
-			args = q;
-			p = args_end = find_eol(path);
-		} else
+		if ((q = found(p, "path = ")))
+			p = path_end = find_eol((path = q));
+		else if ((q = found(p, "args = ")))
+			p = args_end = find_eol((args = q));
+		else
 			break;
 		if (*p == '\r')
 			++p;
