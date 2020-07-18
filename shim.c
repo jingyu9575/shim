@@ -107,7 +107,8 @@ int process(void) {
 
 	// read entire shim file and append '\0'
 	HANDLE file =
-	    CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+	    CreateFileW(filename, GENERIC_READ,
+	                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 	                NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file == INVALID_HANDLE_VALUE)
 		return bail();
